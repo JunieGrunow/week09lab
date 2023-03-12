@@ -33,8 +33,8 @@
                         <td>${user.firstName}</td>
                         <td>${user.lastName}</td>
                         <td>${user.role.name}</td>
-                        <td><a href="UserServlet/?action=edit">Edit</a></td>
-                        <td><a href="UserServlet/?action=delete">Delete</a></td>
+                        <td><a href="UserServlet?action=edit&email=${user.email}">Edit</a></td>
+                        <td><a href="UserServlet?action=delete&email=${user.email}">Delete</a></td>
                     </tr>
                 </c:forEach>
                 
@@ -43,29 +43,32 @@
         </c:if>
         <c:if test="${form.equals('add')}">  
             <h1>Add User</h1>
-            <form >
+            <form action="UserServlet" method="post">
                 <input type="text" name="email" value="${email}">
                 <input type="text" name="first" value="${first}">
                 <input type="text" name="last" value="${last}">
                 <input type="password" name="password" value="${password}">
                 <select name="role">
-                    <option value="admin">System Admin</option>
-                    <option value="regular">Regular User</option>
+                    <option value="1">System Admin</option>
+                    <option value="2">Regular User</option>
                 </select>  
-                <input type="submit" action="UserServlet" method="post" value="add">
+                <input type="hidden" name="action" value="add">
+                <input type="submit" value="Submit">
             </form>
         </c:if>
+            
        <c:if test="${form.equals('edit')}">  
-            <h1>Add User</h1>
+            <h1>Edit User</h1>
             <form >
                 <span>${email}</span>
-                <input type="text" name="first" value="${first}" required><br>
-                <input type="text" name="last" value="${last}" required><br>
-                <input type="password" name="password" value="${password}" required><br>
+                <span>${user.email}</span><br>
+                <input type="text" name="last" value="${user.lastName}" required><br>
+                <input type="password" name="password" value="${User.password}" required><br>
                 <select name="role" required>
-                    <option value="admin">System Admin</option>
-                    <option value="regular">Regular User</option>
+                    <option value="1">System Admin</option>
+                    <option value="2">Regular User</option>
                 </select><br>
+                <input type="hidden" name="action" value="edit">
                 <input type="submit" action="UserServlet" value="update" method="post">
                 <input type="button" onClick="parent.location='UserServlet\'" value="Cancel"
             </form>

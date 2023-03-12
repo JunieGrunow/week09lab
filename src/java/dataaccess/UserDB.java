@@ -16,7 +16,47 @@ import models.User;
  * @author nuket
  */
 public class UserDB {
-    
+    public User getUser(String email) throws Exception{
+        ConnectionPool pool = ConnectionPool.getInstance();
+        Connection con = pool.getConnection();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String statement = "SELECT * FROM user where email=?";
+        User user = null;
+        try{
+           ps = con.prepareStatement(statement);
+           ps.setString(1,email);
+           rs = ps.executeQuery();
+           
+           while(rs.next()){
+               
+               String firstName = rs.getString(2);
+               String lastName = rs.getString(3);
+               String password = rs.getString(4);
+               int role = rs.getInt(5);
+               
+               if(role==1){
+                   Role temp = new Role(1,"System Admin");
+                   
+                   user = new User(email,firstName, lastName, password, temp);
+                   
+               }
+               if(role==2){
+                   Role temp = new Role(2,"General User");
+                   
+                   user = new User(email,firstName, lastName, password, temp);
+                   
+               }
+               
+           }
+        }finally{
+            DBUtil.closeResultSet(rs);
+            DBUtil.closePreparedStatement(ps);
+            pool.freeConnection(con);
+        }
+        return user;
+        
+    }
     public List<User> getAll() throws Exception{
         List<User> users = new ArrayList<>();
         ConnectionPool pool = ConnectionPool.getInstance();
@@ -62,7 +102,7 @@ public class UserDB {
         Connection con = pool.getConnection();
         PreparedStatement ps = null;
         ResultSet rs = null;
-        String statement = "INSERT INTO user (email, first_name, last_name, password, role values(?,?,?,?)";
+        String statement = "INSERT INTO user (email, first_name, last_name, password, role) values(?,?,?,?,?)";
         
         try {
             ps = con.prepareStatement(statement);
@@ -107,7 +147,7 @@ public class UserDB {
             pool.freeConnection(con);
         }
     }
-    public void delete(User user) throws Exception {
+    public void delete(String email) throws Exception {
         ConnectionPool pool = ConnectionPool.getInstance();
         Connection con = pool.getConnection();
         PreparedStatement ps = null;
@@ -115,7 +155,7 @@ public class UserDB {
         
         try{
             ps = con.prepareStatement(statement);
-            ps.setString(1, user.getEmail());
+            ps.setString(1, email);
             ps.executeUpdate();
         }finally{
             DBUtil.closePreparedStatement(ps);
