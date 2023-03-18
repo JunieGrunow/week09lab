@@ -9,6 +9,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import models.Role;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+
 
 
 /**
