@@ -32,7 +32,7 @@
                         <td>${user.email}</td>
                         <td>${user.firstName}</td>
                         <td>${user.lastName}</td>
-                        <td>${user.role.name}</td>
+                        <td>${user.role.roleName}</td>
                         <td><a href="UserServlet?action=edit&email=${user.email}">Edit</a></td>
                         <td><a href="UserServlet?action=delete&email=${user.email}">Delete</a></td>
                     </tr>

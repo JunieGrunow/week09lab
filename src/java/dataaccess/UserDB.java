@@ -5,9 +5,8 @@
  */
 package dataaccess;
 
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.EntityManager;
 import models.Role;
 import models.User;
 
@@ -17,149 +16,67 @@ import models.User;
  */
 public class UserDB {
     public User getUser(String email) throws Exception{
-        ConnectionPool pool = ConnectionPool.getInstance();
-        Connection con = pool.getConnection();
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String statement = "SELECT * FROM user where email=?";
-        User user = null;
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try{
-           ps = con.prepareStatement(statement);
-           ps.setString(1,email);
-           rs = ps.executeQuery();
-           
-           while(rs.next()){
-               
-               String firstName = rs.getString(2);
-               String lastName = rs.getString(3);
-               String password = rs.getString(4);
-               int role = rs.getInt(5);
-               
-               if(role==1){
-                   Role temp = new Role(1,"System Admin");
-                   
-                   user = new User(email,firstName, lastName, password, temp);
-                   
-               }
-               if(role==2){
-                   Role temp = new Role(2,"General User");
-                   
-                   user = new User(email,firstName, lastName, password, temp);
-                   
-               }
-               
-           }
+            User user = em.find(User.class, email);
+           return user;
         }finally{
-            DBUtil.closeResultSet(rs);
-            DBUtil.closePreparedStatement(ps);
-            pool.freeConnection(con);
+           em.close();
         }
-        return user;
+       
         
     }
     public List<User> getAll() throws Exception{
-        List<User> users = new ArrayList<>();
-        ConnectionPool pool = ConnectionPool.getInstance();
-        Connection con = pool.getConnection();
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-         String statement = "SELECT * FROM user";
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
         
         try{
-           ps = con.prepareStatement(statement);
-           rs = ps.executeQuery();
-           while(rs.next()){
-               String email = rs.getString(1);
-               String firstName = rs.getString(2);
-               String lastName = rs.getString(3);
-               String password = rs.getString(4);
-               int role = rs.getInt(5);
-               
-               if(role==1){
-                   Role temp = new Role(1,"System Admin");
-                   
-                   User user = new User(email,firstName, lastName, password, temp);
-                   users.add(user);
-               }
-               if(role==2){
-                   Role temp = new Role(2,"General User");
-                   
-                   User user = new User(email,firstName, lastName, password, temp);
-                   users.add(user);
-               }
-               
-           }
-        }finally{
-            DBUtil.closeResultSet(rs);
-            DBUtil.closePreparedStatement(ps);
-            pool.freeConnection(con);
+            
+           List<User> users = em.createNamedQuery("User.findAll", User.class).getResultList();
+           return users;
+           }finally{
+            em.close();
         }
-        return users;
     }
     
     public void insert(User user) throws Exception {
-         ConnectionPool pool = ConnectionPool.getInstance();
-        Connection con = pool.getConnection();
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String statement = "INSERT INTO user (email, first_name, last_name, password, role) values(?,?,?,?,?)";
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        EntityTransaction trans = em.getTransaction();
         
         try {
-            ps = con.prepareStatement(statement);
-            ps.setString(1, user.getEmail());
-            ps.setString(2, user.getFirstName());
-            ps.setString(3, user.getLastName());
-            ps.setString(4, user.getPassword());
-            if(user.getRole().getID()==1){
-                ps.setInt(5,1);
-            }
-             if(user.getRole().getID()==2){
-                ps.setInt(5,2);
-            }
-            ps.executeUpdate();
+            
+            trans.begin();
+            em.persist(user);
+            trans.commit();
         } finally{
-            DBUtil.closePreparedStatement(ps);
-            pool.freeConnection(con);
+         em.close();
         }
     }
     
     public void update(User user) throws Exception {
         
-        ConnectionPool pool = ConnectionPool.getInstance();
-        Connection con = pool.getConnection();
-        PreparedStatement ps = null;
-        String statement = "UPDATE user SET first_name=?. last_name=?, password=?, role=? WHERE email=?";
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        EntityTransaction trans = em.getTransaction();
         
         try {
-            ps = con.prepareStatement(statement);
-            ps.setString(1, user.getFirstName());
-            ps.setString(2, user.getLastName());
-            ps.setString(3, user.getPassword());
-            if(user.getRole().getID()==1){
-                ps.setInt(5,1);
-            }
-             if(user.getRole().getID()==2){
-                ps.setInt(5,2);
-            }
-            ps.executeUpdate();
+            
+            trans.begin();
+            em.merge(user);
+            trans.commit();
         } finally{
-            DBUtil.closePreparedStatement(ps);
-            pool.freeConnection(con);
+         em.close();
         }
     }
     public void delete(String email) throws Exception {
-        ConnectionPool pool = ConnectionPool.getInstance();
-        Connection con = pool.getConnection();
-        PreparedStatement ps = null;
-        String statement = "DELETE FROM user WHERE email=?";
+       EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        EntityTransaction trans = em.getTransaction();
         
-        try{
-            ps = con.prepareStatement(statement);
-            ps.setString(1, email);
-            ps.executeUpdate();
-        }finally{
-            DBUtil.closePreparedStatement(ps);
-            pool.freeConnection(con);
+        try {
+            
+            trans.begin();
+            em.remove(user);
+            trans.commit();
+        } finally{
+         em.close();
         }
     }
 }

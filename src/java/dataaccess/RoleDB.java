@@ -44,6 +44,18 @@ public class RoleDB {
         }
         return roles;
     }
+    public Role get(int id){
+      EntityManager em = DBUtil.getEmFactory().createEntityManager();
+      try{
+          Role role = em.find(Role.class, id);
+          return role;
+      }finally{
+          em.close();
+      }
+        
+        
+    }
+            
     
     public void insert(Role role) throws Exception {
         ConnectionPool pool = ConnectionPool.getInstance();
